@@ -1,0 +1,361 @@
+? GUIDA SETUP COMPLETA - NEL GRIMORIO APP
+
+? INDICE
+    1. Prerequisiti 
+    2. Setup Firebase 
+    3. Clone e Installazione Progetto 
+    4. Configurazione 
+    5. Test Locale 
+    6. Deploy Vercel 
+    7. Troubleshooting 
+    8. Prossimi Passi 
+
+1?? PREREQUISITI
+Cosa ti serve:
+? Node.js (versione 18 o superiore)
+    • Controlla: Apri terminale e scrivi node --version 
+    • Se non installato: nodejs.org 
+? Git (per clonare il progetto)
+    • Controlla: git --version 
+    • Se non installato: git-scm.com 
+? Account creati:
+    • ? Firebase (fatto ?) 
+    • ? Vercel (fatto ?) 
+    • ? GitHub (fatto ?) 
+? Editor di codice:
+    • VS Code (che hai già ?) 
+
+2?? SETUP FIREBASE
+STEP 2.1 - Crea Database Firestore
+    1. Vai su: console.firebase.google.com 
+    2. Apri il tuo progetto: "nel-grimorio-app" 
+    3. Nel menu laterale sinistro, click su "Firestore Database" 
+    4. Click bottone "Crea database" 
+    5. Scegli: 
+        ? Modalità: "Produzione" (production mode) 
+        ? Località: "europe-west1 (Belgio)" o "europe-west3 (Frankfurt)" 
+    6. Click "Abilita" 
+?? Attendi 1-2 minuti che il database venga creato.
+
+STEP 2.2 - Abilita Authentication
+    1. Nel menu laterale, click su "Authentication" 
+    2. Click bottone "Inizia" (o "Get Started") 
+    3. Tab "Sign-in method" 
+    4. Click su "Email/Password" 
+    5. Abilita il toggle 
+    6. Click "Salva" 
+Nota: Per Telegram Login useremo un sistema custom che configureremo dopo. Per ora Email/Password è sufficiente per testare.
+
+STEP 2.3 - Ottieni Credenziali Firebase
+    1. Click icona ingranaggio ?? in alto a sinistra (vicino a "Panoramica progetto") 
+    2. Click "Impostazioni progetto" 
+    3. Scorri in basso fino a "Le tue app" 
+    4. Click sull'icona </> (Web) 
+    5. Registra app: 
+        ? Nome app: "Nel Grimorio Web" 
+        ? ? NON abilitare Firebase Hosting 
+        ? Click "Registra app" 
+    6. Vedrai un codice come questo: 
+javascript
+const firebaseConfig = {
+  apiKey: "AIzaSyXXXXXXXXXXXXXXXXXX",
+  authDomain: "nel-grimorio-app.firebaseapp.com",
+  projectId: "nel-grimorio-app",
+  storageBucket: "nel-grimorio-app.appspot.com",
+  messagingSenderId: "123456789",
+  appId: "1:123456789:web:xxxxx"
+};
+? COPIA QUESTE CREDENZIALI - Le userai dopo!
+
+STEP 2.4 - Configura Regole Firestore
+    1. Torna a "Firestore Database" 
+    2. Click tab "Regole" (Rules) 
+    3. COPIA E INCOLLA queste regole: 
+javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    function isStaffOrAbove() {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'staff'];
+    }
+    
+    function isReferenteOrAbove() {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'staff', 'referente'];
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      allow update: if isAuthenticated() && (request.auth.uid == userId || isStaffOrAbove());
+      allow delete: if isAdmin();
+    }
+    
+    // Games collection
+    match /games/{gameId} {
+      allow read: if true; // Tutti possono leggere
+      allow create: if isReferenteOrAbove();
+      allow update: if isReferenteOrAbove();
+      allow delete: if isStaffOrAbove();
+    }
+    
+    // Rooms collection
+    match /rooms/{roomId} {
+      allow read: if true; // Tutti possono vedere le stanze
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated();
+      allow delete: if isReferenteOrAbove();
+      
+      // Messages subcollection
+      match /messages/{messageId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated();
+        allow delete: if isAuthenticated() && 
+                       (resource.data.userId == request.auth.uid || isReferenteOrAbove());
+      }
+    }
+    
+    // Settings collection (solo admin/staff)
+    match /settings/{document=**} {
+      allow read: if true;
+      allow write: if isStaffOrAbove();
+    }
+  }
+}
+    4. Click "Pubblica" 
+? Le regole sono configurate!
+
+3?? CLONE E INSTALLAZIONE PROGETTO
+STEP 3.1 - Scarica il progetto
+Ti invierò il progetto in uno di questi modi:
+OPZIONE A - GitHub Repository (Consigliato):
+bash
+# Nel terminale
+git clone https://github.com/[TUO-USERNAME]/nel-grimorio-app.git
+cd nel-grimorio-app
+OPZIONE B - File ZIP:
+    1. Scarica il file ZIP che ti invio 
+    2. Estrai la cartella 
+    3. Apri terminale nella cartella estratta 
+
+STEP 3.2 - Installa Dipendenze
+Nel terminale, nella cartella del progetto:
+bash
+npm install
+?? Attendi 2-3 minuti. Vedrai scaricare tanti pacchetti.
+Dipendenze installate:
+    • react - Framework UI 
+    • firebase - Backend e database 
+    • react-router-dom - Navigazione 
+    • lucide-react - Icone 
+    • date-fns - Gestione date 
+
+4?? CONFIGURAZIONE
+STEP 4.1 - Configura Firebase
+    1. Apri VS Code nella cartella del progetto 
+    2. Vai su src/config/firebase.js 
+    3. Troverai questo: 
+javascript
+// INCOLLA QUI LE TUE CREDENZIALI FIREBASE
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_AUTH_DOMAIN",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_STORAGE_BUCKET",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+    4. SOSTITUISCI con le credenziali che hai copiato prima (STEP 2.3) 
+    5. SALVA il file (Ctrl+S / Cmd+S) 
+
+STEP 4.2 - Configura Variabili Brand
+    1. Apri src/styles/variables.css 
+    2. Verifica i colori (già impostati): 
+css
+:root {
+  --color-primary: #DCB339;      /* Giallo main */
+  --color-bg: #0F0F0F;           /* Soft black */
+  --color-white: #FFFFFF;
+  --color-cyan: #0BADBF;         /* Accento */
+  --color-magenta: #E82570;      /* Accento */
+  --color-violet: #8A25E8;       /* Accento */
+  
+  --font-main: system-ui, -apple-system, sans-serif;
+}
+    3. Se vuoi cambiare font, modifica --font-main 
+
+STEP 4.3 - Aggiungi Logo
+    1. Scarica il tuo logo da: https://imgur.com/a/JrhccYm 
+    2. Salva come logo.png 
+    3. Copia in public/logo.png 
+Il logo verrà caricato automaticamente nell'app!
+
+5?? TEST LOCALE
+STEP 5.1 - Avvia l'App
+Nel terminale:
+bash
+npm run dev
+```
+
+Vedrai:
+```
+  VITE v5.x.x  ready in 500 ms
+
+  ?  Local:   http://localhost:5173/
+  ?  Network: use --host to expose
+STEP 5.2 - Apri nel Browser
+    1. Apri Chrome/Firefox 
+    2. Vai su: http://localhost:5173 
+    3. Dovresti vedere l'app Nel Grimorio! ? 
+
+STEP 5.3 - Crea Primo Utente Admin
+    1. Click "Accedi con Telegram" (per ora usa email) 
+    2. Apparirà form registrazione 
+    3. Inserisci: 
+        ? Email: tua-email@example.com 
+        ? Password: password-sicura 
+    4. Click "Registrati" 
+IMPORTANTE: Il primo utente diventa automaticamente Admin!
+
+STEP 5.4 - Testa le Features
+? Prova queste cose:
+    1. Crea una stanza: 
+        ? Click su un gioco 
+        ? Seleziona 2-3 date 
+        ? "Crea Stanza" 
+        ? Vedi la stanza in Home! 
+    2. Chat nella stanza: 
+        ? Apri la stanza che hai creato 
+        ? Scrolla in basso 
+        ? Vedi la chat? Scrivi un messaggio! 
+    3. Ricerca: 
+        ? Scrivi "war" nella barra 
+        ? Vedi i suggerimenti? 
+        ? Click su un gioco 
+    4. Lista Giochi: 
+        ? Menu hamburger ? "Lista Giochi" 
+        ? Vedi tutti i giochi con filtri 
+
+6?? DEPLOY VERCEL
+STEP 6.1 - Prepara il Progetto
+    1. Assicurati che tutto funzioni localmente 
+    2. Nel terminale: 
+bash
+# Ferma il server locale (Ctrl+C)
+# Crea build di produzione
+npm run build
+Verrà creata una cartella dist/ con l'app compilata.
+
+STEP 6.2 - Pusha su GitHub
+bash
+git add .
+git commit -m "Initial commit - Nel Grimorio App"
+git push origin main
+
+STEP 6.3 - Deploy su Vercel
+    1. Vai su vercel.com 
+    2. Click "Add New Project" 
+    3. Seleziona il repository GitHub: nel-grimorio-app 
+    4. Vercel rileva automaticamente che è Vite/React 
+    5. NON modificare nulla nelle impostazioni 
+    6. Click "Deploy" 
+?? Attendi 2-3 minuti...
+? APP ONLINE!
+Riceverai un URL tipo: nel-grimorio-app.vercel.app
+
+STEP 6.4 - Configura Dominio Firebase
+    1. Torna su Firebase Console 
+    2. Authentication ? Settings ? Authorized domains 
+    3. Aggiungi: nel-grimorio-app.vercel.app 
+    4. Salva 
+
+7?? TROUBLESHOOTING
+Problema: "npm: command not found"
+Soluzione: Installa Node.js da nodejs.org
+
+Problema: Errore Firebase "Permission denied"
+Causa: Regole Firestore non pubblicate
+Soluzione:
+    1. Vai su Firebase ? Firestore ? Regole 
+    2. Copia le regole dello STEP 2.4 
+    3. Click "Pubblica" 
+
+Problema: App bianca dopo deploy
+Causa: Percorsi non configurati
+Soluzione:
+    1. Vercel Dashboard ? Settings ? Build & Development 
+    2. Output Directory: dist 
+    3. Redeploy 
+
+Problema: "Failed to fetch" quando provi a registrarti
+Causa: Firebase config non copiato
+Soluzione:
+    1. Controlla src/config/firebase.js 
+    2. Verifica che le credenziali siano corrette 
+    3. Riavvia con npm run dev 
+
+Problema: Chat non funziona
+Causa: Regole Firestore per subcollection messages
+Soluzione: Controlla che le regole includano:
+javascript
+match /rooms/{roomId} {
+  match /messages/{messageId} {
+    allow read: if isAuthenticated();
+    allow create: if isAuthenticated();
+  }
+}
+
+8?? PROSSIMI PASSI
+? Hai completato l'installazione!
+Adesso puoi:
+    1. Testare tutte le features in produzione 
+    2. Invitare i primi utenti (condividi il link Vercel) 
+    3. Creare contenuti: 
+        ? Aggiungi giochi della tua associazione 
+        ? Crea eventi 
+        ? Testa le stanze 
+? Features da implementare dopo:
+FASE 2 - Social:
+    • Profili utenti completi 
+    • Collezioni personali 
+    • Storico partite 
+    • Marketplace 
+FASE 3 - Avanzate:
+    • Telegram Bot integration 
+    • Notifiche push 
+    • Statistiche avanzate 
+    • Referenti specializzati (GDR/Tavolo) 
+
+? SUPPORTO
+Se hai problemi:
+    1. Controlla il Troubleshooting sopra 
+    2. Console Browser: Apri F12 ? Console ? copia errori 
+    3. Contattami con: 
+        ? Screenshot dell'errore 
+        ? Cosa stavi facendo 
+        ? Browser e sistema operativo 
+
+? CONGRATULAZIONI!
+Hai appena deployato Nel Grimorio, una web app moderna e completa per la tua associazione ludica!
+Cosa hai ora:
+    • ? Database cloud (Firebase) 
+    • ? Autenticazione utenti 
+    • ? Sistema stanze con chat real-time 
+    • ? Gestione giochi 
+    • ? Ruoli e permessi 
+    • ? App online 24/7 
+Goditi la tua app! ???
+
