@@ -1,0 +1,10 @@
+:root {
+  --color-primary: #DCB339;      /* Giallo main */
+  --color-bg: #0F0F0F;           /* Soft black */
+  --color-white: #FFFFFF;
+  --color-cyan: #0BADBF;         /* Accento */
+  --color-magenta: #E82570;      /* Accento */
+  --color-violet: #8A25E8;       /* Accento */
+  
+  --font-main: system-ui, -apple-system, sans-serif;
+}
