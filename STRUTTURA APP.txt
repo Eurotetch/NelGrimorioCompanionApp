@@ -56,3 +56,92 @@ nel-grimorio-app/
 ├── package.json                    (Dipendenze)
 ├── vite.config.js                  (Config build)
 └── README.md                       (Guida completa che hai letto)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Firebase Firestore
+
+settings/
+  └─ global/
+      ├─ roomDuration: 30 (giorni, modificabile da Admin/Staff)
+      ├─ openDays: ["tuesday", "friday", "sunday"]
+      └─ gameCategories: ["Giochi da tavolo", "GDR", ...]
+
+users/
+  └─ userId/
+      ├─ telegramId, name, username, avatar
+      ├─ role: "admin" | "staff" | "referente" | "user"
+      ├─ preferences: {
+          showCategories: ["Giochi da tavolo": true, ...]
+        }
+      └─ stats: { gamesPlayed, eventsJoined, ... }
+
+games/
+  └─ gameId/
+      ├─ title, year, designer, bggId, ...
+      ├─ players: { min, max, optimal }
+      ├─ duration: { min, max }
+      ├─ category: "Giochi da tavolo" | "GDR" | ...
+      ├─ owner: "association" | userId
+      ├─ status: "available" | "loaned" | "maintenance"
+      ├─ loanedTo: { userId, date }
+      ├─ donatedBy: userId
+      └─ tags: ["hotness", "new", ...]
+
+rooms/
+  └─ roomId/
+      ├─ gameId
+      ├─ gameName, gameImage
+      ├─ minPlayers, maxPlayers
+      ├─ creatorId, creatorName
+      ├─ proposedDates: ["2024-12-15", "2024-12-20", ...]
+      ├─ participants: [
+          { 
+            userId, 
+            name, 
+            avatar,
+            status: "active" | "bench",
+            selectedDate: "2024-12-20",
+            joinedAt 
+          }
+        ]
+      ├─ status: "open" | "full" | "closed"
+      ├─ createdAt
+      ├─ expiresAt (createdAt + 30 giorni)
+      └─ closedReason: null | "expired" | "manual" | "datePassed" | "allLeft"
+
+events/
+  └─ eventId/
+      ├─ title, description
+      ├─ imageUrl (locandina)
+      ├─ date
+      ├─ createdBy: userId (Admin/Staff)
+      └─ createdAt
+
+personalCollections/
+  └─ userId/
+      └─ games: [gameIds]
+
+wishlists/
+  └─ userId/
+      └─ games: [gameIds]
+
+marketplace/
+  └─ listingId/
+      ├─ gameId
+      ├─ sellerId
+      ├─ type: "sell" | "trade"
+      ├─ price, condition, notes
+      └─ status: "available" | "sold"
