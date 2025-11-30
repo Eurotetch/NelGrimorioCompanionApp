@@ -6,6 +6,19 @@
 
 body {
   font-family: system-ui, -apple-system, sans-serif;
-  background: #0F0F0F;
-  color: white;
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* Nascondi scrollbar su alcuni elementi */
+.overflow-x-auto::-webkit-scrollbar {
+  display: none;
+}
+
+.overflow-x-auto {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
