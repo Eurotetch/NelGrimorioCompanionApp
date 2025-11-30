@@ -1,39 +1,52 @@
-import React, { useState, useEffect } from 'react';
+//Versione 2.0.1
+
+import React, { useState } from 'react';
 import { Search, X, Users, Clock, Star, Bell, User, LogIn, Menu, MessageCircle, Calendar, Send, Facebook, Instagram, Gamepad2, Home, AlertCircle, ShoppingCart, Mail } from 'lucide-react';
 
 const NelGrimorioApp = () => {
-  // State
   const [isAuth, setIsAuth] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
   const [showAuth, setShowAuth] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
   const [showDateModal, setShowDateModal] = useState(false);
   const [showGameDetail, setShowGameDetail] = useState(null);
   const [showRoomDetail, setShowRoomDetail] = useState(null);
-  const [selectedGame, setSelectedGame] = useState(null);
   const [selectedDates, setSelectedDates] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-
-  const [rooms, setRooms] = useState([
-    { 
-      id: 'r1', 
-      gameId: 1,
-      gameName: "War of the Ring",
-      gameImage: "https://cf.geekdo-images.com/ImPgGag98W6gpV1KV812LA__imagepage/img/ZHAFxwwPAmpSqOjTHnpHBhV7TXY=/fit-in/900x600/filters:no_upscale():strip_icc()/pic1215633.jpg",
-      creator: { id: 'u1', name: 'Marco' },
-      proposedDates: ['2024-12-20', '2024-12-27', '2025-01-03'],
-      active: ['Marco', 'Luca', 'Sara', 'Anna'],
-      bench: [],
-      max: 4,
-      createdAt: new Date('2024-12-01'),
-      expiresAt: new Date('2024-12-25')
-    }
-  ]);
 
   const games = [
     { id: 1, title: "War of the Ring", img: "https://cf.geekdo-images.com/ImPgGag98W6gpV1KV812LA__imagepage/img/ZHAFxwwPAmpSqOjTHnpHBhV7TXY=/fit-in/900x600/filters:no_upscale():strip_icc()/pic1215633.jpg", players: [2,4], time: 180, rating: 8.5 },
     { id: 2, title: "Catan", img: "https://cf.geekdo-images.com/W3Bsga_uLP9kO91gZ7H8yw__imagepage/img/M_3Vv0uI7iNJSc_gYOtr5ql8AjY=/fit-in/900x600/filters:no_upscale():strip_icc()/pic2419375.jpg", players: [3,4], time: 90, rating: 7.2 },
     { id: 3, title: "D&D", img: "https://cf.geekdo-images.com/6G3ZuW1c-TdmQWJMFjC5kg__imagepage/img/sJVY1jMUcCkDi1eV4JxLHRZ3pAg=/fit-in/900x600/filters:no_upscale():strip_icc()/pic4254509.jpg", players: [3,7], time: 240, rating: 8.8 }
+  ];
+
+  const rooms = [
+    { 
+      id: 'r1', 
+      game: games[0], 
+      creator: 'Marco', 
+      active: ['Marco', 'Luca', 'Sara', 'Anna'],
+      bench: [],
+      max: 4, 
+      days: -5 
+    },
+    { 
+      id: 'r2', 
+      game: games[1], 
+      creator: 'Giovanni',
+      active: ['Giovanni', 'Francesca'],
+      bench: [],
+      max: 4, 
+      days: -25 
+    },
+    { 
+      id: 'r3', 
+      game: games[2], 
+      creator: 'Paolo',
+      active: ['Paolo', 'Elena', 'Tommaso', 'Lisa', 'Andrea', 'Sofia', 'Marco'],
+      bench: ['Giulia', 'Roberto'],
+      max: 7, 
+      days: 'Passata' 
+    }
   ];
 
   const menu = [
@@ -44,95 +57,17 @@ const NelGrimorioApp = () => {
     { icon: Calendar, label: 'Programma Eventi' },
     { icon: Send, label: 'Invia Feedback' }
   ];
-  
-  // Helper functions
-  const getDaysRemaining = (expiresAt) => {
-    const now = new Date();
-    const expires = new Date(expiresAt);
-    const diffTime = expires - now;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (diffDays < 0) return { value: 0, label: 'Passata', color: 'bg-red-500' };
-    if (diffDays <= 3) return { value: diffDays, label: `-${diffDays}g`, color: 'bg-red-500' };
-    if (diffDays <= 7) return { value: diffDays, label: `-${diffDays}g`, color: 'bg-orange-500' };
-    return { value: diffDays, label: `-${diffDays}g`, color: 'bg-yellow-500' };
-  };
 
-  const handleLogin = () => {
-    setTimeout(() => {
-      setCurrentUser({ id: 'user123', name: 'Francesco', username: 'francesco_dev' });
-      setIsAuth(true);
-      setShowAuth(false);
-    }, 500);
-  };
-
-  const handleWantToPlay = (game) => {
-    if (!isAuth) {
-      setShowAuth(true);
-      return;
-    }
-    setSelectedGame(game);
-    setSelectedDates([]);
-    setShowDateModal(true);
-  };
-
-  const toggleDateSelection = (dateStr) => {
-    if (selectedDates.includes(dateStr)) {
-      setSelectedDates(selectedDates.filter(d => d !== dateStr));
-    } else {
-      if (selectedDates.length < 3) {
-        setSelectedDates([...selectedDates, dateStr]);
-      }
-    }
-  };
-
-  // FIX CREAZIONE STANZE
-  const confirmDates = () => {
-    if (selectedDates.length === 0 || !currentUser || !selectedGame) return;
-
-    const newRoom = {
-      id: 'r' + Date.now(),
-      gameId: selectedGame.id,
-      gameName: selectedGame.title,
-      gameImage: selectedGame.img,
-      creator: currentUser,
-      proposedDates: selectedDates,
-      active: [currentUser.name],
-      bench: [],
-      max: selectedGame.players[1],
-      createdAt: new Date(),
-      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-    };
-
-    setRooms([...rooms, newRoom]);
-    setShowDateModal(false);
-    setSelectedGame(null);
-    setSelectedDates([]);
-  };
-
-  const generateAvailableDates = () => {
-    const dates = [];
-    const today = new Date();
-    
-    for (let i = 0; i < 60; i++) {
-      const date = new Date(today);
-      date.setDate(today.getDate() + i);
-      const dayOfWeek = date.getDay();
-      
-      if (dayOfWeek === 0 || dayOfWeek === 2 || dayOfWeek === 5) {
-        dates.push({
-          date: date.toISOString().split('T')[0],
-          display: date.toLocaleDateString('it-IT', { weekday: 'short', day: 'numeric', month: 'short' })
-        });
-      }
-    }
-    return dates;
-  };
-
-  const availableDates = generateAvailableDates();
-  
   return (
-    <div className="min-h-screen bg-stone-900 text-white overflow-x-hidden">
+    <div className="min-h-screen bg-stone-900 text-white overflow-x-hidden" style={{ fontFamily: 'var(--font-main, system-ui, -apple-system, sans-serif)' }}>
+      <style>{`
+        :root {
+          --color-primary: #DCB339;
+          --color-bg: #0F0F0F;
+          --font-main: system-ui, -apple-system, sans-serif;
+        }
+      `}</style>
+
       {/* Sidebar */}
       <div className={`fixed inset-y-0 left-0 w-64 bg-stone-950 border-r border-stone-800 z-50 transition-transform ${showSidebar ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="p-4">
@@ -158,10 +93,10 @@ const NelGrimorioApp = () => {
         <div className="max-w-7xl mx-auto px-2 sm:px-4 py-3">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <button onClick={() => setShowSidebar(true)} className="p-2 hover:bg-stone-800 rounded-lg">
+              <button onClick={() => setShowSidebar(true)} className="p-2 hover:bg-stone-800 rounded-lg flex-shrink-0">
                 <Menu className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400" />
               </button>
-              <div className="w-8 h-8 sm:w-12 sm:h-12 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-lg flex items-center justify-center text-lg sm:text-2xl">📖</div>
+              <div className="w-8 h-8 sm:w-12 sm:h-12 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-lg flex items-center justify-center text-lg sm:text-2xl flex-shrink-0">📖</div>
               <div className="hidden sm:block">
                 <h1 className="text-xl sm:text-2xl font-bold text-yellow-400">Nel Grimorio</h1>
                 <p className="text-xs text-stone-400">Associazione Ludica</p>
@@ -182,14 +117,14 @@ const NelGrimorioApp = () => {
             </div>
 
             <div className="flex items-center gap-2">
-              <button className="p-2 hover:bg-stone-800 rounded-lg relative">
+              <button className="p-2 hover:bg-stone-800 rounded-lg relative flex-shrink-0">
                 <Bell className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400" />
                 <span className="absolute top-1 right-1 w-2 h-2 bg-cyan-400 rounded-full" />
               </button>
               {isAuth ? (
-                <button className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-lg font-semibold text-stone-900 text-sm">
+                <button className="hidden sm:flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-lg font-semibold text-stone-900 text-sm">
                   <User className="w-4 h-4" />
-                  <span className="hidden md:inline">{currentUser?.name}</span>
+                  <span className="hidden md:inline">Francesco</span>
                 </button>
               ) : (
                 <button onClick={() => setShowAuth(true)} className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-cyan-500 to-cyan-600 rounded-lg font-semibold text-xs sm:text-sm">
@@ -201,6 +136,7 @@ const NelGrimorioApp = () => {
           </div>
         </div>
       </nav>
+
       {/* Main */}
       <div className="max-w-7xl mx-auto px-2 sm:px-4 py-4 sm:py-8">
         {/* Stanze */}
