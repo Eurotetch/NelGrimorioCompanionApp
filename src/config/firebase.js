@@ -1,10 +1,8 @@
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { getFirestore, enableIndexedDbPersistence } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 
-// 👇 INCOLLA QUI LE TUE CREDENZIALI FIREBASE
 const firebaseConfig = {
   apiKey: "AIzaSyAQc0MLTKCbWStSqPp0iYLb9UghGI_mprQ",
   authDomain: "nel-grimorio-app.firebaseapp.com",
@@ -16,5 +14,18 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+export const storage = getStorage(app);
+
+// Enable offline persistence
+enableIndexedDbPersistence(db).catch((err) => {
+  if (err.code === 'failed-precondition') {
+    console.warn('Persistence failed: Multiple tabs open');
+  } else if (err.code === 'unimplemented') {
+    console.warn('Persistence not available');
+  }
+});
+
+export default app;

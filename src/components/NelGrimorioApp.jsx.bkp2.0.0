@@ -1,11 +1,9 @@
-//Versione 2.0.5
+//Versione 2.0.1
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Search, X, Users, Clock, Star, Bell, User, LogIn, Menu, MessageCircle, Calendar, Send, Facebook, Instagram, Gamepad2, Home, AlertCircle, ShoppingCart, Mail } from 'lucide-react';
 
 const NelGrimorioApp = () => {
-  const navigate = useNavigate();
   const [isAuth, setIsAuth] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
@@ -52,12 +50,12 @@ const NelGrimorioApp = () => {
   ];
 
   const menu = [
-    { icon: Home, label: 'Home', path: '/' },
-    { icon: Gamepad2, label: 'Lista Giochi', path: '/games' },
-    { icon: MessageCircle, label: 'Consigliami tu!', path: '/recommend' },
-    { icon: ShoppingCart, label: 'Mercatino Compravendite', path: '/marketplace' },
-    { icon: Calendar, label: 'Programma Eventi', path: '/events' },
-    { icon: Send, label: 'Invia Feedback', path: '/feedback' }
+    { icon: Home, label: 'Home' },
+    { icon: Gamepad2, label: 'Lista Giochi' },
+    { icon: MessageCircle, label: 'Consigliami tu!' },
+    { icon: ShoppingCart, label: 'Mercatino Compravendite' },
+    { icon: Calendar, label: 'Programma Eventi' },
+    { icon: Send, label: 'Invia Feedback' }
   ];
 
   return (
@@ -80,18 +78,11 @@ const NelGrimorioApp = () => {
             </button>
           </div>
           {menu.map((item, i) => (
-			  <button 
-				key={i} 
-				onClick={() => {
-				  navigate(item.path);
-				  setShowSidebar(false);
-				}}
-				className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-stone-800 text-left mb-2"
-			  >
-				<item.icon className="w-5 h-5 text-yellow-400" />
-				<span>{item.label}</span>
-			  </button>
-			))}
+            <button key={i} className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-stone-800 text-left mb-2">
+              <item.icon className="w-5 h-5 text-yellow-400" />
+              <span>{item.label}</span>
+            </button>
+          ))}
         </div>
       </div>
 
@@ -131,15 +122,12 @@ const NelGrimorioApp = () => {
                 <span className="absolute top-1 right-1 w-2 h-2 bg-cyan-400 rounded-full" />
               </button>
               {isAuth ? (
-                <button 
-				  onClick={() => navigate('/profile')}
-				  className="hidden sm:flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-lg font-semibold text-stone-900 text-sm hover:from-yellow-400 hover:to-yellow-500 transition-colors cursor-pointer"
-				>
+                <button className="hidden sm:flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-lg font-semibold text-stone-900 text-sm">
                   <User className="w-4 h-4" />
                   <span className="hidden md:inline">Francesco</span>
                 </button>
               ) : (
-                <button onClick={() => navigate('/login')} className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-cyan-500 to-cyan-600 rounded-lg font-semibold text-xs sm:text-sm">
+                <button onClick={() => setShowAuth(true)} className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-cyan-500 to-cyan-600 rounded-lg font-semibold text-xs sm:text-sm">
                   <LogIn className="w-4 h-4 sm:w-5 sm:h-5" />
                   <span className="hidden sm:inline">Accedi</span>
                 </button>
@@ -191,7 +179,7 @@ const NelGrimorioApp = () => {
           <h2 className="text-2xl sm:text-3xl font-bold text-yellow-400 mb-4 sm:mb-6">🔥 Hotness & New</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
             {games.map(game => (
-              <div key={game.id} onClick={() => !isAuth ? navigate('/login', { state: { from: '/' } }) : setShowDateModal(true)} className="bg-stone-800 rounded-xl overflow-hidden hover:scale-105 transition-transform cursor-pointer">
+              <div key={game.id} onClick={() => !isAuth ? setShowAuth(true) : setShowDateModal(true)} className="bg-stone-800 rounded-xl overflow-hidden hover:scale-105 transition-transform cursor-pointer">
                 <img src={game.img} alt={game.title} className="w-full h-32 sm:h-48 object-cover" />
                 <div className="p-2 sm:p-3">
                   <h3 className="font-bold text-xs sm:text-sm mb-1 truncate">{game.title}</h3>
@@ -229,30 +217,28 @@ const NelGrimorioApp = () => {
         </div>
       </footer>
 
-      {/* Auth Modal NON UTILIZZATA: Usa pagina /login */}
-		  {
-		// {showAuth && (
-        // <div className="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center p-4">
-          // <div className="bg-stone-800 rounded-2xl max-w-md w-full p-6 sm:p-8 border-2 border-yellow-500 max-h-screen overflow-y-auto">
-            // <div className="flex justify-between items-center mb-6">
-              // <h2 className="text-2xl sm:text-3xl font-bold text-yellow-400">Accedi</h2>
-              // <button onClick={() => setShowAuth(false)} className="p-2 hover:bg-stone-700 rounded-lg">
-                // <X className="w-6 h-6" />
-              // </button>
-            // </div>
-            // <p className="text-stone-300 mb-6 text-sm sm:text-base">Accedi con Telegram per gestire stanze e organizzare partite</p>
-            // <button onClick={() => { setIsAuth(true); setShowAuth(false); }} className="w-full bg-gradient-to-r from-cyan-500 to-cyan-600 py-3 sm:py-4 rounded-lg font-bold text-sm sm:text-base mb-3">
-              // <LogIn className="inline w-5 h-5 sm:w-6 sm:h-6 mr-2" />
-              // Accedi con Telegram
-            // </button>
-            // <button onClick={() => setShowAuth(false)} className="w-full bg-stone-700 hover:bg-stone-600 py-2 sm:py-3 rounded-lg font-semibold text-sm sm:text-base">
-              // Continua come anonimo
-            // </button>
-            // <p className="text-xs text-stone-500 mt-4 text-center">Come ospite Anonimo non potrai creare né partecipare alle stanze né usare funzionalità extra</p>
-          // </div>
-        // </div>
-      // )}
-		  }
+      {/* Auth Modal */}
+      {showAuth && (
+        <div className="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center p-4">
+          <div className="bg-stone-800 rounded-2xl max-w-md w-full p-6 sm:p-8 border-2 border-yellow-500 max-h-screen overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl sm:text-3xl font-bold text-yellow-400">Accedi</h2>
+              <button onClick={() => setShowAuth(false)} className="p-2 hover:bg-stone-700 rounded-lg">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <p className="text-stone-300 mb-6 text-sm sm:text-base">Accedi con Telegram per gestire stanze e organizzare partite</p>
+            <button onClick={() => { setIsAuth(true); setShowAuth(false); }} className="w-full bg-gradient-to-r from-cyan-500 to-cyan-600 py-3 sm:py-4 rounded-lg font-bold text-sm sm:text-base mb-3">
+              <LogIn className="inline w-5 h-5 sm:w-6 sm:h-6 mr-2" />
+              Accedi con Telegram
+            </button>
+            <button onClick={() => setShowAuth(false)} className="w-full bg-stone-700 hover:bg-stone-600 py-2 sm:py-3 rounded-lg font-semibold text-sm sm:text-base">
+              Continua come anonimo
+            </button>
+            <p className="text-xs text-stone-500 mt-4 text-center">Come ospite Anonimo non potrai creare né partecipare alle stanze né usare funzionalità extra</p>
+          </div>
+        </div>
+      )}
 
       {/* Room Detail Modal */}
       {showRoomDetail && (
@@ -361,7 +347,7 @@ const NelGrimorioApp = () => {
                 <p className="text-sm sm:text-base text-stone-300">Epico gioco strategico ambientato nella Terra di Mezzo.</p>
               </div>
             </div>
-            <button onClick={() => { setShowGameDetail(null); !isAuth ? navigate('/login', { state: { from: '/' } }) : setShowDateModal(true); }} className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 py-3 sm:py-4 rounded-lg font-bold text-stone-900 text-sm sm:text-base">
+            <button onClick={() => { setShowGameDetail(null); !isAuth ? setShowAuth(true) : setShowDateModal(true); }} className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 py-3 sm:py-4 rounded-lg font-bold text-stone-900 text-sm sm:text-base">
               🎲 Voglio Giocarci!
             </button>
           </div>

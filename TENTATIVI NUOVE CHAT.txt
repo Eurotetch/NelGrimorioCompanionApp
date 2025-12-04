@@ -1,0 +1,14 @@
+Microsoft Copilot
+?
+
+Google Gemini
+https://gemini.google.com/app/e6d9136b1bdee7f3?is_sa=1&is_sa=1&android-min-version=301356232&ios-min-version=322.0&campaign_id=bkws&utm_source=sem&utm_source=google&utm_medium=paid-media&utm_medium=cpc&utm_campaign=bkws&utm_campaign=2024itIT_gemfeb&pt=9008&mt=8&ct=p-growth-sem-bkws&gclsrc=aw.ds&gad_source=1&gad_campaignid=20437330512&gbraid=0AAAAApk5BhlR6EYygWhwExThOkpafbl23&gclid=CjwKCAiA86_JBhAIEiwA4i9Ju6LEiD6FD0ppKwhPWlQupMKkQUQR-zEj9iI6Z-G7khPsiwZ-9Ok7JxoCeSYQAvD_BwE
+
+GitHub Copilot (troppo lunghi tempi di attesa, circa 24 giorni)
+https://github.com/copilot/c/a02a64ac-b2e2-4972-b8af-5029b37681d4
+
+Claude (legacy dalla ver. 2.0.0)
+https://claude.ai/chat/3d216183-3f3d-48bd-8246-792e3fb0f135
+
+Claude (ver. 1.0.0 iniziale)
+
