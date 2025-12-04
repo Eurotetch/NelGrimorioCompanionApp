@@ -2,7 +2,7 @@ import { signInWithCustomToken } from 'firebase/auth';
 import { auth } from '../config/firebase';
 import { createUser, getUser } from './firestore';
 
-// Inizializza Telegram WebApp
+// Inizializza Telegram WebApp (solo se dentro Telegram)
 export const initTelegramWebApp = () => {
   if (window.Telegram?.WebApp) {
     const tg = window.Telegram.WebApp;
@@ -13,7 +13,7 @@ export const initTelegramWebApp = () => {
   return null;
 };
 
-// Ottieni dati utente Telegram
+// Ottieni dati utente Telegram WebApp
 export const getTelegramUser = () => {
   const tg = window.Telegram?.WebApp;
   if (tg?.initDataUnsafe?.user) {
@@ -28,44 +28,45 @@ export const getTelegramUser = () => {
   return null;
 };
 
-// Login con Telegram
-export const loginWithTelegram = async () => {
+// Controlla se siamo dentro Telegram WebApp
+export const isInsideTelegramApp = () => {
+  return !!window.Telegram?.WebApp?.initData;
+};
+
+// Login con Telegram (da WebApp o Widget)
+export const loginWithTelegram = async (userData) => {
   try {
-    const telegramUser = getTelegramUser();
-    
-    if (!telegramUser) {
+    if (!userData) {
       throw new Error('Telegram user data not available');
     }
 
-    // TODO: Implementare Cloud Function Firebase per generare custom token
-    // Per ora, simuliamo il login
-    console.log('Telegram user:', telegramUser);
+    console.log('Telegram user:', userData);
 
     // Controlla se l'utente esiste già in Firestore
-    const userResult = await getUser(telegramUser.id);
+    const userResult = await getUser(userData.id);
     
     if (!userResult.success) {
       // Crea nuovo utente
-      await createUser(telegramUser.id, {
-        telegramId: telegramUser.id,
-        name: `${telegramUser.firstName} ${telegramUser.lastName}`.trim(),
-        username: telegramUser.username,
-        avatar: telegramUser.photoUrl,
-        email: null // Telegram non fornisce email
+      await createUser(userData.id, {
+        telegramId: userData.id,
+        name: `${userData.firstName} ${userData.lastName}`.trim(),
+        username: userData.username,
+        avatar: userData.photoUrl,
+        email: null
       });
     }
 
-    // TODO: Implementare signInWithCustomToken quando sarà pronta la Cloud Function
-    // const customToken = await fetchCustomToken(telegramUser.id);
+    // TODO: Implementare Cloud Function per custom token
+    // const customToken = await fetchCustomToken(userData.id);
     // await signInWithCustomToken(auth, customToken);
 
     return {
       success: true,
       user: {
-        id: telegramUser.id,
-        name: `${telegramUser.firstName} ${telegramUser.lastName}`.trim(),
-        username: telegramUser.username,
-        avatar: telegramUser.photoUrl
+        id: userData.id,
+        name: `${userData.firstName} ${userData.lastName}`.trim(),
+        username: userData.username,
+        avatar: userData.photoUrl
       }
     };
   } catch (error) {

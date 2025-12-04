@@ -1,0 +1,39 @@
+- Messaggio "login effettuato" o "logout" (classica barra verde popup veloce in top)
+
+- List dei giochi:
+	- want-to-play-nomegioco (serve per determinare quante persone hanno espresso di voler giocare a questo gioco. Se questo 	numero è superiore a tot, da valutare il numero, viene mostrato nel carosello HOTNESS della Home)
+	- 
+- List degli utenti:
+	- want-to-play-nomeutente (serve per determinare a quanti giochi vorrebbe giocare l'utente. Simile al contesto di want-to-be-	played-nomegioco ma al contrario)
+	- wishlist-nomeutente
+	- owned-nomeutente	
+	- want-to-trade-nomeutente
+	- owned-anymore-nomeutente (una lista dove finiscono tutti i giochi quando vengono manualmente rimossi dalla collezione 	dell'Utente per motivi vari, tra cui l'ha venduto, ceduto, donato, perso)
+
+
+- Appartenenza gioco: Ogni gioco nella sua Scheda dettagli ha una lista di persone che lo possiedono e tutti possono
+	vedere con chi possono organizzare una partita o se, essendo in più di uno, riescono a tirar su un torneo.
+	Ogni gioco avrà un ID gioco e le Stanze useranno questo ID per tracciare informazioni.
+	DA CONSIDERARE: Se queste liste sono troppo lunghe, sarebbe opportuno "spezzarle" ad aggiungere un anchor "Vedi la lista completa" 	per mostrare una Modale con tutta la lista completa di nomi Utente o Giochi (dipende dal contesto, leggere i punti sotto).
+	Ecco quindi le liste presenti in fondo nella Scheda dettagli del gioco:
+	LISTA 1) "NELLA COLLEZIONI DI:" #owned-nomeutente1, #owned-nomeutente2, ecc.
+		Se invece il gioco ERA nella collezione di un utente, il nome è in grigio (come fosse disabilitato) ad indicare
+		che non è più suo ma per qualsiasi info è possibile avere una persona di riferimento a cui chiedere pareri, dubbi, ecc;
+	LISTA 2) "GIOCATORI INTERESSATI A GIOCARCI:" #want-to-play-nomeutente1, #want-to-play-nomeutente2, ecc;
+	LISTA 3) "STANZE FINORA ORGANIZZATE PER QUESTO GIOCO:" con un numero pari al numero di stanze contenenti il suo ID nel database, 		sia presenti che passate;
+	LISTA 4) "è NELLA WISHLIST DI:" #wishlist-nomeutente1, ecc;
+	LISTA 5) "è IN VENDITA DA QUESTI UTENTI:" #wish-to-trade-nomeutente3, ecc;
+
+- Button sotto ad ogni gioco nella Scheda dettagli:
+	- "Vorrei Giocarci!" (già scritto ed implementato ma da ampliare: aggiunge l'ID del Gioco alla lista #want-to-play-utente 	dell'Utente e aggiunge l'ID Utente alla lista #want-to-play-nomegioco del Gioco);
+	- "Aggiungi a Wishlist" (già scritto ma da implementare: aggiunge l'ID del Gioco alla lista #wishlist-utente dell'Utente e 	aggiunge l'ID Utente alla lista #wishlist-nomegioco del Gioco);
+	- "Ce l'ho!" (da implementare: aggiunge l'ID del Gioco alla lista #owned-utente dell'Utente e aggiunge l'ID dell'Utente alla lista 	#owned-nomegioco del Gioco);
+	- "Vorrei darlo via", visibile solo se l'utente ha l'ID di questo gioco nella sua lista #owned-utente (da implementare: aggiunge 	l'ID del Gioco alla lista #want-to-trade-utente dell'Utente e aggiunge l'ID Utente alla lista #want-to-trade-utente del Gioco)
+
+- Button nel Profilo Utente:
+	Nella sezione Giochi Posseduti (lista #owned-nomeutente) l'Utente ha la possibilità di gestirla grazie a questi button:
+	- "Vorrei Giocarci!" (Cosa fa? Fa esattamente la stessa cosa che fa il button nella Scheda dettaglio del Gioco. Sarebbe quindi 	quasi opportuno creare una Funzione in comune per essere richiamata sia quì che nel button della Scheda dettaglio del Gioco);
+	- Vorrei darlo via" (Cosa fa? Fa esattamente la stessa cosa che fa il button nella Scheda dettaglio del Gioco. Sarebbe quindi 	quasi opportuno creare una Funzione in comune per essere richiamata sia quì che nel button della Scheda dettaglio del Gioco);
+	- "Non ce l'ho più!", dove apre una piccola Modale con delle domande obbligatorie da rispondere per procedere oltre:
+	A) L'ho perduto, B) L'ho regalato/venduto/donato, C) Non vorrei più condividerlo all'interno dell'Associazione. Se viene scelta 	l'opzione C) allora appare una seconda sezione "A Chi l'hai regalato/venduto/donato?" e tra le risposte ha tre scelte:
+	1) Qualcuno fuori dall'Associazione, 2) Non ricordo/Non so il nome 3)"Scorri la lista di nomi Utente" (Cosa fa? Rimuove l'ID del 	Gioco dalla lista #owned-nomeutente dell'Utente e lo aggiunge invece alla lista #owned-anymore-nomeutente sempre dello stesso 	Utente. Nel caso in cui nelle domande della Modale di conferma ha selezionato l'opzione B), l'ho regalato/venduto/donato, allora 	viene inviata una notifica all'utente che ha selezionato nella seconda sezione se ha scelto un nome nella lista di nomi 	dell'opzione 3), altrimenti non invierà alcuna notifica)

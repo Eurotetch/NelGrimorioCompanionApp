@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LogIn, ArrowLeft, AlertCircle } from 'lucide-react';
+import { ArrowLeft, AlertCircle, Info } from 'lucide-react';
+import TelegramLoginButton from '../components/TelegramLoginButton';
+import { isInsideTelegramApp, getTelegramUser } from '../services/telegramAuth';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -11,12 +13,37 @@ const Login = () => {
   const [error, setError] = useState(null);
 
   const from = location.state?.from || '/';
+  const insideTelegram = isInsideTelegramApp();
 
-  const handleTelegramLogin = async () => {
+  // Se siamo dentro Telegram WebApp, usa i dati direttamente
+  const handleTelegramWebAppLogin = async () => {
     setIsLoading(true);
     setError(null);
+
+    const telegramUser = getTelegramUser();
+    if (!telegramUser) {
+      setError('Impossibile ottenere i dati utente da Telegram');
+      setIsLoading(false);
+      return;
+    }
+
+    const result = await loginWithTelegram(telegramUser);
     
-    const result = await loginWithTelegram();
+    if (result.success) {
+      navigate(from, { replace: true });
+    } else {
+      setError(result.error || 'Errore durante il login');
+    }
+    
+    setIsLoading(false);
+  };
+
+  // Callback per il widget Telegram (da browser)
+  const handleTelegramWidgetAuth = async (user) => {
+    setIsLoading(true);
+    setError(null);
+
+    const result = await loginWithTelegram(user);
     
     if (result.success) {
       navigate(from, { replace: true });
@@ -64,27 +91,47 @@ const Login = () => {
           </div>
         )}
 
-        <button 
-          onClick={handleTelegramLogin}
-          disabled={isLoading}
-          className="w-full bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-400 hover:to-cyan-500 py-4 rounded-lg font-bold text-base mb-3 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
-        >
-          {isLoading ? (
-            <>
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              <span>Connessione in corso...</span>
-            </>
-          ) : (
-            <>
-              <LogIn className="w-6 h-6" />
+        {/* Info: diverso metodo in base a dove apri l'app */}
+        {!insideTelegram && (
+          <div className="mb-4 p-3 bg-cyan-900/30 border border-cyan-500 rounded-lg flex items-start gap-2">
+            <Info className="w-5 h-5 text-cyan-400 flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-cyan-300">
+              Stai aprendo l'app da browser. Clicca sul pulsante Telegram qui sotto per autenticarti.
+            </p>
+          </div>
+        )}
+
+        {/* Telegram WebApp (dentro Telegram) */}
+        {insideTelegram ? (
+          <button 
+            onClick={handleTelegramWebAppLogin}
+            disabled={isLoading}
+            className="w-full bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-400 hover:to-cyan-500 py-4 rounded-lg font-bold text-base mb-3 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
+          >
+            {isLoading ? (
+              <>
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span>Connessione in corso...</span>
+              </>
+            ) : (
               <span>Accedi con Telegram</span>
-            </>
-          )}
-        </button>
+            )}
+          </button>
+        ) : (
+          /* Telegram Widget (da browser) */
+          <div className="mb-3">
+            <TelegramLoginButton 
+              botUsername="NelGrimorioCompanionApp_bot" 
+              onAuth={handleTelegramWidgetAuth}
+              buttonSize="large"
+            />
+          </div>
+        )}
 
         <button 
           onClick={handleGuestContinue}
-          className="w-full bg-stone-700 hover:bg-stone-600 py-3 rounded-lg font-semibold text-base transition-colors"
+          disabled={isLoading}
+          className="w-full bg-stone-700 hover:bg-stone-600 py-3 rounded-lg font-semibold text-base transition-colors disabled:opacity-50"
         >
           Continua come Ospite
         </button>
