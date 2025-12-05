@@ -1,17 +1,36 @@
-- Messaggio "login effettuato" o "logout" (classica barra verde popup veloce in top)
+- Aggiungere messaggio "login effettuato" o "logout" (classica barra verde popup veloce in top)
 
 - List dei giochi:
 	- want-to-play-nomegioco (serve per determinare quante persone hanno espresso di voler giocare a questo gioco. Se questo 	numero è superiore a tot, da valutare il numero, viene mostrato nel carosello HOTNESS della Home)
-	- 
+	- wishlist-nomegioco
+	- owned-nomegioco	
+	- want-to-trade-nomegioco
+	- owned-anymore-nomegioco
 - List degli utenti:
-	- want-to-play-nomeutente (serve per determinare a quanti giochi vorrebbe giocare l'utente. Simile al contesto di want-to-be-	played-nomegioco ma al contrario)
+	- want-to-play-nomeutente (serve per determinare a quanti giochi vorrebbe giocare l'utente. Simile al contesto di want-to-play-	nomegioco ma al contrario)
 	- wishlist-nomeutente
 	- owned-nomeutente	
 	- want-to-trade-nomeutente
 	- owned-anymore-nomeutente (una lista dove finiscono tutti i giochi quando vengono manualmente rimossi dalla collezione 	dell'Utente per motivi vari, tra cui l'ha venduto, ceduto, donato, perso)
 
+Immagino una struttura come questa:
+	Utente Francesco_Luongo_001
+		#want-to-play-francesco_luongo_001
+			- Coloni di Catan (0531434)
+			- On Mars (3105433)
+			- 7 Wonders (4140001)
+		#wishlist-francesco_luongo_001
+			- Dungeons&Dragons (0003134)
+		#owned-francesco_luongo_001
+			- Outlive (0013531)
+			- Sagrada (0002321)
+		#want-to-trade-francesco_luongo_001
+			//empty
+		#owned-anymore-francesco_luongo_001
+			- Coloni Imperiali (0130001)
 
-- Appartenenza gioco: Ogni gioco nella sua Scheda dettagli ha una lista di persone che lo possiedono e tutti possono
+- Appartenenza gioco:
+	Ogni gioco nella sua Scheda dettagli ha una lista di persone che lo possiedono e tutti possono
 	vedere con chi possono organizzare una partita o se, essendo in più di uno, riescono a tirar su un torneo.
 	Ogni gioco avrà un ID gioco e le Stanze useranno questo ID per tracciare informazioni.
 	DA CONSIDERARE: Se queste liste sono troppo lunghe, sarebbe opportuno "spezzarle" ad aggiungere un anchor "Vedi la lista completa" 	per mostrare una Modale con tutta la lista completa di nomi Utente o Giochi (dipende dal contesto, leggere i punti sotto).
@@ -37,3 +56,9 @@
 	- "Non ce l'ho più!", dove apre una piccola Modale con delle domande obbligatorie da rispondere per procedere oltre:
 	A) L'ho perduto, B) L'ho regalato/venduto/donato, C) Non vorrei più condividerlo all'interno dell'Associazione. Se viene scelta 	l'opzione C) allora appare una seconda sezione "A Chi l'hai regalato/venduto/donato?" e tra le risposte ha tre scelte:
 	1) Qualcuno fuori dall'Associazione, 2) Non ricordo/Non so il nome 3)"Scorri la lista di nomi Utente" (Cosa fa? Rimuove l'ID del 	Gioco dalla lista #owned-nomeutente dell'Utente e lo aggiunge invece alla lista #owned-anymore-nomeutente sempre dello stesso 	Utente. Nel caso in cui nelle domande della Modale di conferma ha selezionato l'opzione B), l'ho regalato/venduto/donato, allora 	viene inviata una notifica all'utente che ha selezionato nella seconda sezione se ha scelto un nome nella lista di nomi 	dell'opzione 3), altrimenti non invierà alcuna notifica)
+
+- Ambiguità account Staff e Utente:
+	L'account Admin o quello di un membro dello Staff può gestire tutto dietro le quinte ma questi account sono anche in realtà 	persone fisiche che fanno parte dell'associazione. Ad esempio io Francesco (che sono Admin), ho anche una mia collezione di 	giochi, di wishlist eccetera. Servirebbe che anche gli account Admin o Staff abbiano le stesse feature che hanno gli Utenti 	normali, con queste sole differenze:
+	- Nel 
+	- Admin o Staff ha una spunta nel nome (a livello di frontend, un'icona o qualcosa che sia riconoscibile) ma a livello di database ha un ID Utente come tutti gli altri con il suo Nome_Cognome_ID (dati presi da Telegram, ID generato in automatico)
+	- Ha accesso al Pannello di Controllo Admin SE ha nel database il valore 1 sulla colonna "Staff"
