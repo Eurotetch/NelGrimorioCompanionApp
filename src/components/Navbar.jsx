@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { Search, X, Bell, User, LogIn, Menu } from 'lucide-react';
 
 const Navbar = ({ searchTerm, onSearchChange, showSearch = true }) => {
   const navigate = useNavigate();
+  const { isAuth, user } = useAuth(); // ✅ Usa i dati da AuthContext
   const [showSidebar, setShowSidebar] = useState(false);
-  const [isAuth, setIsAuth] = useState(false); // TODO: Collegare a Firebase Auth
 
   const menuItems = [
     { icon: '🏠', label: 'Home', path: '/' },
@@ -99,13 +100,17 @@ const Navbar = ({ searchTerm, onSearchChange, showSearch = true }) => {
                 <span className="absolute top-1 right-1 w-2 h-2 bg-cyan-400 rounded-full" />
               </button>
               
-              {isAuth ? (
+              {isAuth && user ? (
                 <button 
                   onClick={() => navigate('/profile')}
-                  className="hidden sm:flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-lg font-semibold text-stone-900 text-sm hover:from-yellow-400 hover:to-yellow-500 transition-colors"
+                  className="flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-lg font-semibold text-stone-900 text-sm hover:from-yellow-400 hover:to-yellow-500 transition-colors"
                 >
-                  <User className="w-4 h-4" />
-                  <span className="hidden md:inline">Francesco</span>
+                  {user.avatar ? (
+                    <img src={user.avatar} alt={user.name} className="w-6 h-6 rounded-full" />
+                  ) : (
+                    <User className="w-4 h-4" />
+                  )}
+                  <span className="hidden md:inline">{user.name || user.username}</span>
                 </button>
               ) : (
                 <button 

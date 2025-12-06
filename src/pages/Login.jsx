@@ -1,44 +1,66 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { ArrowLeft, AlertCircle, Info } from 'lucide-react';
+import { ArrowLeft, AlertCircle, Info, Loader } from 'lucide-react';
 import TelegramLoginButton from '../components/TelegramLoginButton';
 import { isInsideTelegramApp, getTelegramUser } from '../services/telegramAuth';
 
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { loginWithTelegram } = useAuth();
+  const { loginWithTelegram, isAuth } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const from = location.state?.from || '/';
   const insideTelegram = isInsideTelegramApp();
 
-  // Se siamo dentro Telegram WebApp, usa i dati direttamente
+  // Se già autenticato, redirect
+  useEffect(() => {
+    if (isAuth) {
+      navigate(from, { replace: true });
+    }
+  }, [isAuth, navigate, from]);
+
+  // Se dentro Telegram, tenta auto-login immediato
+  useEffect(() => {
+    if (insideTelegram) {
+      handleTelegramWebAppLogin();
+    }
+  }, [insideTelegram]);
+
+  // Login da Telegram WebApp (dentro l'app Telegram)
   const handleTelegramWebAppLogin = async () => {
     setIsLoading(true);
     setError(null);
 
-    const telegramUser = getTelegramUser();
-    if (!telegramUser) {
-      setError('Impossibile ottenere i dati utente da Telegram');
-      setIsLoading(false);
-      return;
-    }
+    try {
+      const telegramUser = getTelegramUser();
+      
+      if (!telegramUser) {
+        setError('Impossibile ottenere i dati da Telegram. Riprova.');
+        setIsLoading(false);
+        return;
+      }
 
-    const result = await loginWithTelegram(telegramUser);
-    
-    if (result.success) {
-      navigate(from, { replace: true });
-    } else {
-      setError(result.error || 'Errore durante il login');
+      console.log('Dati Telegram WebApp:', telegramUser);
+
+      const result = await loginWithTelegram(telegramUser);
+      
+      if (result.success) {
+        navigate(from, { replace: true });
+      } else {
+        setError(result.error || 'Errore durante il login');
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('Errore imprevisto durante il login');
+    } finally {
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
   };
 
-  // Callback per il widget Telegram (da browser)
+  // Callback per il widget Telegram (da browser desktop)
   const handleTelegramWidgetAuth = async (user) => {
     setIsLoading(true);
     setError(null);
@@ -57,6 +79,19 @@ const Login = () => {
   const handleGuestContinue = () => {
     navigate(from, { replace: true });
   };
+
+  // Se dentro Telegram e sta caricando, mostra loader
+  if (insideTelegram && isLoading) {
+    return (
+      <div className="min-h-screen bg-stone-900 text-white flex items-center justify-center p-4">
+        <div className="text-center">
+          <Loader className="w-16 h-16 text-yellow-400 animate-spin mx-auto mb-4" />
+          <p className="text-xl font-semibold text-yellow-400">Accesso in corso...</p>
+          <p className="text-stone-400 text-sm mt-2">Autenticazione con Telegram</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-stone-900 text-white flex items-center justify-center p-4 relative">
@@ -91,43 +126,28 @@ const Login = () => {
           </div>
         )}
 
-        {/* Info: diverso metodo in base a dove apri l'app */}
+        {/* Info: solo da browser */}
         {!insideTelegram && (
           <div className="mb-4 p-3 bg-cyan-900/30 border border-cyan-500 rounded-lg flex items-start gap-2">
             <Info className="w-5 h-5 text-cyan-400 flex-shrink-0 mt-0.5" />
             <p className="text-xs text-cyan-300">
-              Stai aprendo l'app da browser. Clicca sul pulsante Telegram qui sotto per autenticarti.
+              Clicca sul pulsante Telegram qui sotto per autenticarti tramite il tuo account Telegram.
             </p>
           </div>
         )}
 
-        {/* Telegram WebApp (dentro Telegram) */}
-        {insideTelegram ? (
-          <button 
-            onClick={handleTelegramWebAppLogin}
-            disabled={isLoading}
-            className="w-full bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-400 hover:to-cyan-500 py-4 rounded-lg font-bold text-base mb-3 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
-          >
-            {isLoading ? (
-              <>
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                <span>Connessione in corso...</span>
-              </>
-            ) : (
-              <span>Accedi con Telegram</span>
-            )}
-          </button>
-        ) : (
-          /* Telegram Widget (da browser) */
+        {/* Telegram Widget (solo da browser) */}
+        {!insideTelegram && (
           <div className="mb-3">
             <TelegramLoginButton 
-              botUsername="NelGrimorioCompanionApp_bot" 
+              botUsername="NelGrimorioCompanionApp_bot"
               onAuth={handleTelegramWidgetAuth}
               buttonSize="large"
             />
           </div>
         )}
 
+        {/* Guest Button */}
         <button 
           onClick={handleGuestContinue}
           disabled={isLoading}
