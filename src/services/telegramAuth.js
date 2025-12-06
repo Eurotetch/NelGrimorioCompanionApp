@@ -1,50 +1,57 @@
 import { createUser, getUser } from './firestore';
 
-// Inizializza Telegram WebApp (solo se dentro Telegram)
 export const initTelegramWebApp = () => {
   if (window.Telegram?.WebApp) {
     const tg = window.Telegram.WebApp;
     tg.ready();
     tg.expand();
+    console.log('✅ Telegram WebApp inizializzato');
     return tg;
   }
+  console.log('⚠️ Telegram WebApp non disponibile');
   return null;
 };
 
-// Ottieni dati utente Telegram WebApp
 export const getTelegramUser = () => {
   const tg = window.Telegram?.WebApp;
-  if (tg?.initDataUnsafe?.user) {
-    return {
-      id: tg.initDataUnsafe.user.id.toString(),
-      firstName: tg.initDataUnsafe.user.first_name,
-      lastName: tg.initDataUnsafe.user.last_name || '',
-      username: tg.initDataUnsafe.user.username || '',
-      photoUrl: tg.initDataUnsafe.user.photo_url || null
-    };
+  
+  if (!tg?.initDataUnsafe?.user) {
+    console.log('⚠️ Dati utente Telegram non disponibili');
+    console.log('InitData:', tg?.initData);
+    console.log('InitDataUnsafe:', tg?.initDataUnsafe);
+    return null;
   }
-  return null;
+
+  const user = tg.initDataUnsafe.user;
+  console.log('✅ Dati utente Telegram trovati:', user);
+
+  return {
+    id: user.id.toString(),
+    firstName: user.first_name,
+    lastName: user.last_name || '',
+    username: user.username || '',
+    photoUrl: user.photo_url || null
+  };
 };
 
-// Controlla se siamo dentro Telegram WebApp
 export const isInsideTelegramApp = () => {
-  return !!window.Telegram?.WebApp?.initData;
+  const inside = !!window.Telegram?.WebApp?.initData;
+  console.log('🔍 Dentro Telegram?', inside);
+  return inside;
 };
 
-// Login con dati Telegram (da WebApp o Widget)
 export const loginWithTelegram = async (userData) => {
   try {
     if (!userData || !userData.id) {
       throw new Error('Dati utente Telegram mancanti');
     }
 
-    console.log('Login con dati Telegram:', userData);
+    console.log('🔐 Tentativo login con:', userData);
 
-    // Controlla se l'utente esiste già in Firestore
     const userResult = await getUser(userData.id);
     
     if (!userResult.success) {
-      // Crea nuovo utente
+      console.log('📝 Creazione nuovo utente...');
       await createUser(userData.id, {
         telegramId: userData.id,
         name: `${userData.firstName} ${userData.lastName}`.trim(),
@@ -54,6 +61,7 @@ export const loginWithTelegram = async (userData) => {
       });
     }
 
+    console.log('✅ Login completato');
     return {
       success: true,
       user: {
@@ -64,18 +72,17 @@ export const loginWithTelegram = async (userData) => {
       }
     };
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('❌ Errore login:', error);
     return { success: false, error: error.message };
   }
 };
 
-// Logout (placeholder per ora)
 export const logout = async () => {
   try {
-    // TODO: Implementare signOut quando avremo Firebase Auth completo
+    console.log('👋 Logout effettuato');
     return { success: true };
   } catch (error) {
-    console.error('Logout error:', error);
+    console.error('❌ Errore logout:', error);
     return { success: false, error: error.message };
   }
 };

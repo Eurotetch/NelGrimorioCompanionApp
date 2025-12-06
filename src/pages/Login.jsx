@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { ArrowLeft, AlertCircle, Info, Loader } from 'lucide-react';
-import TelegramLoginButton from '../components/TelegramLoginButton';
+import { ArrowLeft, AlertCircle, ExternalLink, Loader } from 'lucide-react';
 import { isInsideTelegramApp, getTelegramUser } from '../services/telegramAuth';
 
 const Login = () => {
@@ -15,21 +14,20 @@ const Login = () => {
   const from = location.state?.from || '/';
   const insideTelegram = isInsideTelegramApp();
 
-  // Se già autenticato, redirect
+  // Se già autenticato, redirect immediato
   useEffect(() => {
     if (isAuth) {
       navigate(from, { replace: true });
     }
   }, [isAuth, navigate, from]);
 
-  // Se dentro Telegram, tenta auto-login immediato
+  // Auto-login se dentro Telegram
   useEffect(() => {
-    if (insideTelegram) {
+    if (insideTelegram && !isAuth) {
       handleTelegramWebAppLogin();
     }
-  }, [insideTelegram]);
+  }, [insideTelegram, isAuth]);
 
-  // Login da Telegram WebApp (dentro l'app Telegram)
   const handleTelegramWebAppLogin = async () => {
     setIsLoading(true);
     setError(null);
@@ -38,50 +36,37 @@ const Login = () => {
       const telegramUser = getTelegramUser();
       
       if (!telegramUser) {
-        setError('Impossibile ottenere i dati da Telegram. Riprova.');
-        setIsLoading(false);
-        return;
+        throw new Error('Impossibile ottenere i dati da Telegram');
       }
 
-      console.log('Dati Telegram WebApp:', telegramUser);
+      console.log('✅ Dati Telegram ricevuti:', telegramUser);
 
       const result = await loginWithTelegram(telegramUser);
       
       if (result.success) {
+        console.log('✅ Login completato con successo');
         navigate(from, { replace: true });
       } else {
-        setError(result.error || 'Errore durante il login');
+        throw new Error(result.error || 'Login fallito');
       }
     } catch (err) {
-      console.error('Login error:', err);
-      setError('Errore imprevisto durante il login');
+      console.error('❌ Errore login:', err);
+      setError(err.message);
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // Callback per il widget Telegram (da browser desktop)
-  const handleTelegramWidgetAuth = async (user) => {
-    setIsLoading(true);
-    setError(null);
-
-    const result = await loginWithTelegram(user);
-    
-    if (result.success) {
-      navigate(from, { replace: true });
-    } else {
-      setError(result.error || 'Errore durante il login');
-    }
-    
-    setIsLoading(false);
   };
 
   const handleGuestContinue = () => {
     navigate(from, { replace: true });
   };
 
-  // Se dentro Telegram e sta caricando, mostra loader
-  if (insideTelegram && isLoading) {
+  const handleOpenTelegramBot = () => {
+    window.open('https://t.me/NelGrimorioCompanionApp_bot', '_blank');
+  };
+
+  // Loading state
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-stone-900 text-white flex items-center justify-center p-4">
         <div className="text-center">
@@ -106,12 +91,14 @@ const Login = () => {
       </button>
 
       <div className="relative bg-stone-800 rounded-2xl max-w-md w-full p-6 sm:p-8 border-2 border-yellow-500 shadow-2xl">
+        {/* Logo */}
         <div className="flex justify-center mb-6">
           <div className="w-20 h-20 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-2xl flex items-center justify-center text-4xl shadow-lg">
             📖
           </div>
         </div>
 
+        {/* Title */}
         <div className="text-center mb-6">
           <h1 className="text-3xl font-bold text-yellow-400 mb-2">Benvenuto!</h1>
           <p className="text-stone-300 text-sm">
@@ -119,49 +106,74 @@ const Login = () => {
           </p>
         </div>
 
+        {/* Error */}
         {error && (
           <div className="mb-4 p-3 bg-red-900/30 border border-red-500 rounded-lg flex items-start gap-2">
             <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-            <p className="text-sm text-red-300">{error}</p>
+            <div className="flex-1">
+              <p className="text-sm text-red-300 mb-2">{error}</p>
+              <button
+                onClick={handleTelegramWebAppLogin}
+                className="text-xs text-red-200 underline hover:text-red-100"
+              >
+                Riprova
+              </button>
+            </div>
           </div>
         )}
 
-        {/* Info: solo da browser */}
-        {!insideTelegram && (
-          <div className="mb-4 p-3 bg-cyan-900/30 border border-cyan-500 rounded-lg flex items-start gap-2">
-            <Info className="w-5 h-5 text-cyan-400 flex-shrink-0 mt-0.5" />
-            <p className="text-xs text-cyan-300">
-              Clicca sul pulsante Telegram qui sotto per autenticarti tramite il tuo account Telegram.
+        {/* Se dentro Telegram */}
+        {insideTelegram ? (
+          <div className="mb-4 p-4 bg-cyan-900/30 border border-cyan-500 rounded-lg text-center">
+            <p className="text-sm text-cyan-300 mb-3">
+              ✅ Sei già dentro Telegram! Il login avverrà automaticamente.
             </p>
+            <button
+              onClick={handleTelegramWebAppLogin}
+              className="w-full bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-400 hover:to-cyan-500 py-3 rounded-lg font-bold text-base transition-colors"
+            >
+              Accedi con Telegram
+            </button>
           </div>
-        )}
-
-        {/* Telegram Widget (solo da browser) */}
-        {!insideTelegram && (
-          <div className="mb-3">
-            <TelegramLoginButton 
-              botUsername="NelGrimorioCompanionApp_bot"
-              onAuth={handleTelegramWidgetAuth}
-              buttonSize="large"
-            />
+        ) : (
+          /* Se da browser normale */
+          <div className="mb-4">
+            <div className="p-4 bg-yellow-900/30 border border-yellow-500 rounded-lg mb-4">
+              <p className="text-sm text-yellow-300 mb-3 text-center">
+                ⚠️ Per accedere, devi aprire l'app dal <strong>bot Telegram</strong>
+              </p>
+            </div>
+            
+            <button
+              onClick={handleOpenTelegramBot}
+              className="w-full bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-400 hover:to-cyan-500 py-4 rounded-lg font-bold text-base transition-colors flex items-center justify-center gap-2"
+            >
+              <ExternalLink className="w-5 h-5" />
+              Apri Bot Telegram
+            </button>
+            
+            <p className="text-xs text-stone-500 text-center mt-3">
+              Clicca sul pulsante "Apri App" nel bot per autenticarti
+            </p>
           </div>
         )}
 
         {/* Guest Button */}
         <button 
           onClick={handleGuestContinue}
-          disabled={isLoading}
-          className="w-full bg-stone-700 hover:bg-stone-600 py-3 rounded-lg font-semibold text-base transition-colors disabled:opacity-50"
+          className="w-full bg-stone-700 hover:bg-stone-600 py-3 rounded-lg font-semibold text-base transition-colors"
         >
           Continua come Ospite
         </button>
 
+        {/* Warning Ospite */}
         <div className="mt-6 p-4 bg-stone-900 border border-stone-700 rounded-lg">
           <p className="text-xs text-stone-400 text-center">
             ⚠️ <strong>Modalità Ospite:</strong> Non potrai creare stanze, partecipare alle partite o accedere al profilo utente
           </p>
         </div>
 
+        {/* Benefits */}
         <div className="mt-6 space-y-2">
           <p className="text-xs font-semibold text-yellow-400 mb-2">Con l'account puoi:</p>
           <div className="space-y-1 text-xs text-stone-300">
