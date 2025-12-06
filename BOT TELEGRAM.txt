@@ -62,13 +62,21 @@ Ora quando apri la chat col bot, vedrai il pulsante **"Apri App"** in basso! �
 
 Per far funzionare il login da browser, devi dire a Telegram quale dominio può usare il widget.
 
-Con @BotFather scrivi:
-```
+Apri @BotFather su Telegram e fai:
 /setdomain
-```
+Seleziona il bot @NelGrimorioCompanionApp_bot
+Quando chiede il dominio, inserisci:
+nel-grimorio-companion-app.vercel.app
+✅ IMPORTANTE: NO https://, solo il dominio nudo!
 
-Poi:
-1. Seleziona il bot
-2. Inserisci il dominio:
-```
-   nel-grimorio-companion-app.vercel.app
+
+🎯 Per il pulsante nel gruppo/topic:
+Per mettere il pulsante "Apri App" in un topic del gruppo invece che nella chat del bot:
+
+Aggiungi il bot al gruppo: Nel Grimorio - Organico (o dove vuoi)
+Dagli permessi di amministratore (almeno "Post messages")
+Crea un comando personalizzato che il bot risponderà con un inline button
+
+Questo richiede un bot backend (Node.js/Python) per gestire i comandi. Vuoi che ti mostri come fare? 🤖
+
+Ora fai deploy e testa! Dovrebbe funzionare sia da browser che da Telegram WebApp. 🚀Claude può commettere errori. Verifica sempre le risposte con attenzione.

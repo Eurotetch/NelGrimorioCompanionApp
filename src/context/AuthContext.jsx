@@ -1,8 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../config/firebase';
 import { getUser } from '../services/firestore';
-import { initTelegramWebApp, loginWithTelegram as telegramLogin, logout as telegramLogout } from '../services/telegramAuth';
+import { initTelegramWebApp, getTelegramUser, isInsideTelegramApp, loginWithTelegram as telegramLogin, logout as telegramLogout } from '../services/telegramAuth';
+import { initializeSettings, initializeGames } from '../utils/initializeFirestore';
 
 const AuthContext = createContext();
 
@@ -20,34 +19,54 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Inizializza Telegram WebApp
-    initTelegramWebApp();
+    const initializeApp = async () => {
+      try {
+        // Inizializza Firestore (solo una volta)
+        await initializeSettings();
+        await initializeGames();
 
-    // Listener Firebase Auth
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        // Recupera dati utente da Firestore
-        const result = await getUser(firebaseUser.uid);
-        if (result.success) {
+        // Inizializza Telegram WebApp
+        initTelegramWebApp();
+
+        // Controlla localStorage per session persistente
+        const savedUser = localStorage.getItem('user');
+        if (savedUser) {
+          const userData = JSON.parse(savedUser);
           setIsAuth(true);
-          setUser(result.data);
+          setUser(userData);
+          setLoading(false);
+          return;
         }
-      } else {
-        setIsAuth(false);
-        setUser(null);
-      }
-      setLoading(false);
-    });
 
-    return () => unsubscribe();
+        // Se siamo dentro Telegram WebApp, tenta auto-login
+        if (isInsideTelegramApp()) {
+          const telegramUser = getTelegramUser();
+          if (telegramUser) {
+            const result = await telegramLogin(telegramUser);
+            if (result.success) {
+              setIsAuth(true);
+              setUser(result.user);
+              localStorage.setItem('user', JSON.stringify(result.user));
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Initialization error:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeApp();
   }, []);
 
-  const loginWithTelegram = async () => {
+  const loginWithTelegram = async (userData) => {
     try {
-      const result = await telegramLogin();
+      const result = await telegramLogin(userData);
       if (result.success) {
         setIsAuth(true);
         setUser(result.user);
+        localStorage.setItem('user', JSON.stringify(result.user));
         return { success: true };
       }
       return result;
@@ -62,7 +81,7 @@ export const AuthProvider = ({ children }) => {
       await telegramLogout();
       setIsAuth(false);
       setUser(null);
-      localStorage.removeItem('isAuth');
+      localStorage.removeItem('user');
       return { success: true };
     } catch (error) {
       return { success: false, error: error.message };

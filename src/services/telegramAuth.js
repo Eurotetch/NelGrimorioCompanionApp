@@ -1,5 +1,3 @@
-import { signInWithCustomToken } from 'firebase/auth';
-import { auth } from '../config/firebase';
 import { createUser, getUser } from './firestore';
 
 // Inizializza Telegram WebApp (solo se dentro Telegram)
@@ -33,14 +31,14 @@ export const isInsideTelegramApp = () => {
   return !!window.Telegram?.WebApp?.initData;
 };
 
-// Login con Telegram (da WebApp o Widget)
+// Login con dati Telegram (da WebApp o Widget)
 export const loginWithTelegram = async (userData) => {
   try {
-    if (!userData) {
-      throw new Error('Telegram user data not available');
+    if (!userData || !userData.id) {
+      throw new Error('Dati utente Telegram mancanti');
     }
 
-    console.log('Telegram user:', userData);
+    console.log('Login con dati Telegram:', userData);
 
     // Controlla se l'utente esiste già in Firestore
     const userResult = await getUser(userData.id);
@@ -50,22 +48,18 @@ export const loginWithTelegram = async (userData) => {
       await createUser(userData.id, {
         telegramId: userData.id,
         name: `${userData.firstName} ${userData.lastName}`.trim(),
-        username: userData.username,
+        username: userData.username || '',
         avatar: userData.photoUrl,
         email: null
       });
     }
-
-    // TODO: Implementare Cloud Function per custom token
-    // const customToken = await fetchCustomToken(userData.id);
-    // await signInWithCustomToken(auth, customToken);
 
     return {
       success: true,
       user: {
         id: userData.id,
         name: `${userData.firstName} ${userData.lastName}`.trim(),
-        username: userData.username,
+        username: userData.username || '',
         avatar: userData.photoUrl
       }
     };
@@ -75,10 +69,10 @@ export const loginWithTelegram = async (userData) => {
   }
 };
 
-// Logout
+// Logout (placeholder per ora)
 export const logout = async () => {
   try {
-    await auth.signOut();
+    // TODO: Implementare signOut quando avremo Firebase Auth completo
     return { success: true };
   } catch (error) {
     console.error('Logout error:', error);
