@@ -1,6 +1,12 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { getUser } from '../services/firestore';
-import { loginWithTelegram as telegramLogin } from '../services/telegramAuth';
+import { 
+  initTelegramWebApp, 
+  getTelegramUser, 
+  isInsideTelegramApp, 
+  loginWithTelegram as telegramLogin, 
+  logout as telegramLogout 
+} from '../services/telegramAuth';
 import { initializeSettings, initializeGames } from '../utils/initializeFirestore';
 
 const AuthContext = createContext();
@@ -21,18 +27,38 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const initializeApp = async () => {
       try {
+        // Inizializza Firestore
         await initializeSettings();
         await initializeGames();
 
-        // Controlla localStorage
+        // Inizializza Telegram WebApp
+        initTelegramWebApp();
+
+        // 1. Controlla localStorage
         const savedUser = localStorage.getItem('user');
         if (savedUser) {
           const userData = JSON.parse(savedUser);
           setIsAuth(true);
           setUser(userData);
+          setLoading(false);
+          return;
+        }
+
+        // 2. Se dentro Telegram WebApp, auto-login
+        if (isInsideTelegramApp()) {
+          const telegramUser = getTelegramUser();
+          if (telegramUser) {
+            console.log('🔐 Auto-login da Telegram WebApp');
+            const result = await telegramLogin(telegramUser);
+            if (result.success) {
+              setIsAuth(true);
+              setUser(result.user);
+              localStorage.setItem('user', JSON.stringify(result.user));
+            }
+          }
         }
       } catch (error) {
-        console.error('Errore inizializzazione:', error);
+        console.error('❌ Errore inizializzazione:', error);
       } finally {
         setLoading(false);
       }
@@ -52,15 +78,21 @@ export const AuthProvider = ({ children }) => {
       }
       return result;
     } catch (error) {
+      console.error('❌ Login error:', error);
       return { success: false, error: error.message };
     }
   };
 
   const logout = async () => {
-    setIsAuth(false);
-    setUser(null);
-    localStorage.removeItem('user');
-    return { success: true };
+    try {
+      await telegramLogout();
+      setIsAuth(false);
+      setUser(null);
+      localStorage.removeItem('user');
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
   };
 
   return (
