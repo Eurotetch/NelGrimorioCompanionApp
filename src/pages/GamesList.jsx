@@ -23,7 +23,7 @@ const GamesList = () => {
     { 
       id: 1, 
       title: "War of the Ring", 
-      img: "https://cf.geekdo-images.com/ImPgGag98W6gpV1KV812LA__imagepage/img/ZHAFxwwPAmpSqOjTHnpHBhV7TXY=/fit-in/900x600/filters:no_upscale():strip_icc()/pic1215633.jpg", 
+      img: "https://cf.geekdo-images.com/ImPgGag98W6gpV1KV812aA__itemrep@2x/img/aW_RKvV1YF2-YDPPoB6XS1gnNFw=/fit-in/492x600/filters:strip_icc()/pic1215633.jpg", 
       players: [2,4], 
       time: 180, 
       rating: 8.5,
@@ -34,7 +34,7 @@ const GamesList = () => {
     { 
       id: 2, 
       title: "Catan", 
-      img: "https://cf.geekdo-images.com/W3Bsga_uLP9kO91gZ7H8yw__imagepage/img/M_3Vv0uI7iNJSc_gYOtr5ql8AjY=/fit-in/900x600/filters:no_upscale():strip_icc()/pic2419375.jpg", 
+      img: "https://cf.geekdo-images.com/0XODRpReiZBFUffEcqT5-Q__itemrep@2x/img/81lS9PRn2JwyE4br1l7Z5fgSyFo=/fit-in/492x600/filters:strip_icc()/pic9156909.png", 
       players: [3,4], 
       time: 90, 
       rating: 7.2,
@@ -45,7 +45,7 @@ const GamesList = () => {
     { 
       id: 3, 
       title: "D&D", 
-      img: "https://cf.geekdo-images.com/6G3ZuW1c-TdmQWJMFjC5kg__imagepage/img/sJVY1jMUcCkDi1eV4JxLHRZ3pAg=/fit-in/900x600/filters:no_upscale():strip_icc()/pic4254509.jpg", 
+      img: "https://static.cnews.fr/sites/default/files/2020_redaction/brok_5f3e9a4f4526b.jpg", 
       players: [3,7], 
       time: 240, 
       rating: 8.8,
@@ -56,7 +56,7 @@ const GamesList = () => {
     { 
       id: 4, 
       title: "Ticket to Ride", 
-      img: "https://cf.geekdo-images.com/ZWJg0dCdrWHxVnc0eFXK8w__imagepage/img/pMkDSZGS4W2fev1OX8sjFRq8Y_o=/fit-in/900x600/filters:no_upscale():strip_icc()/pic66668.jpg", 
+      img: "https://cf.geekdo-images.com/kdWYkW-7AqG63HhqPL6ekA__itemrep@2x/img/nAI08lHzxwXX2mVrNcBms4FEO_o=/fit-in/492x600/filters:strip_icc()/pic8937637.jpg", 
       players: [2,5], 
       time: 60, 
       rating: 7.4,
@@ -78,7 +78,7 @@ const GamesList = () => {
     { 
       id: 6, 
       title: "7 Wonders", 
-      img: "https://cf.geekdo-images.com/35h9Za_JvMMMtx_92kT0Jg__imagepage/img/glz9dU5DN3w-fPULlDmL__I0nug=/fit-in/900x600/filters:no_upscale():strip_icc()/pic7149798.jpg", 
+      img: "https://cf.geekdo-images.com/35h9Za_JvMMMtx_92kT0Jg__itemrep@2x/img/C1Q2lgN2URAqsAtanK5XI72phN8=/fit-in/492x600/filters:strip_icc()/pic7149798.jpg", 
       players: [2,7], 
       time: 30, 
       rating: 7.7,
@@ -243,9 +243,9 @@ const GamesList = () => {
                   className="w-full bg-stone-900 border border-stone-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-yellow-500"
                 >
                   <option value="all">Qualsiasi durata</option>
-                  <option value="short">Breve (≤ 60 min)</option>
+                  <option value="short">Breve (60+ min)</option>
                   <option value="medium">Media (60-120 min)</option>
-                  <option value="long">Lunga (> 120 min)</option>
+                  <option value="long">Lunga (120+ min)</option>
                 </select>
               </div>
 

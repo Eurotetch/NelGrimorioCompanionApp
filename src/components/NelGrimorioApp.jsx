@@ -16,9 +16,9 @@ const NelGrimorioApp = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   const games = [
-    { id: 1, title: "War of the Ring", img: "https://cf.geekdo-images.com/ImPgGag98W6gpV1KV812LA__imagepage/img/ZHAFxwwPAmpSqOjTHnpHBhV7TXY=/fit-in/900x600/filters:no_upscale():strip_icc()/pic1215633.jpg", players: [2,4], time: 180, rating: 8.5 },
-    { id: 2, title: "Catan", img: "https://cf.geekdo-images.com/W3Bsga_uLP9kO91gZ7H8yw__imagepage/img/M_3Vv0uI7iNJSc_gYOtr5ql8AjY=/fit-in/900x600/filters:no_upscale():strip_icc()/pic2419375.jpg", players: [3,4], time: 90, rating: 7.2 },
-    { id: 3, title: "D&D", img: "https://cf.geekdo-images.com/6G3ZuW1c-TdmQWJMFjC5kg__imagepage/img/sJVY1jMUcCkDi1eV4JxLHRZ3pAg=/fit-in/900x600/filters:no_upscale():strip_icc()/pic4254509.jpg", players: [3,7], time: 240, rating: 8.8 }
+    { id: 1, title: "War of the Ring", img: "https://cf.geekdo-images.com/ImPgGag98W6gpV1KV812aA__itemrep@2x/img/aW_RKvV1YF2-YDPPoB6XS1gnNFw=/fit-in/492x600/filters:strip_icc()/pic1215633.jpg", players: [2,4], time: 180, rating: 8.5 },
+    { id: 2, title: "Catan", img: "https://cf.geekdo-images.com/0XODRpReiZBFUffEcqT5-Q__itemrep@2x/img/81lS9PRn2JwyE4br1l7Z5fgSyFo=/fit-in/492x600/filters:strip_icc()/pic9156909.png", players: [3,4], time: 90, rating: 7.2 },
+    { id: 3, title: "D&D", img: "https://static.cnews.fr/sites/default/files/2020_redaction/brok_5f3e9a4f4526b.jpg", players: [3,7], time: 240, rating: 8.8 }
   ];
 
   const rooms = [

@@ -28,7 +28,7 @@ const UserProfile = () => {
     { 
       id: 1, 
       title: "War of the Ring", 
-      img: "https://cf.geekdo-images.com/ImPgGag98W6gpV1KV812LA__imagepage/img/ZHAFxwwPAmpSqOjTHnpHBhV7TXY=/fit-in/900x600/filters:no_upscale():strip_icc()/pic1215633.jpg",
+      img: "https://cf.geekdo-images.com/ImPgGag98W6gpV1KV812aA__itemrep@2x/img/aW_RKvV1YF2-YDPPoB6XS1gnNFw=/fit-in/492x600/filters:strip_icc()/pic1215633.jpg",
       status: 'available'
     },
     { 
