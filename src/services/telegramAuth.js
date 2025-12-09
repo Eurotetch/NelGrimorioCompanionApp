@@ -5,62 +5,73 @@ export const initTelegramWebApp = () => {
     const tg = window.Telegram.WebApp;
     tg.ready();
     tg.expand();
-    tg.enableClosingConfirmation();
-    console.log('✅ Telegram WebApp inizializzato');
+    console.log('✅ Telegram WebApp ready');
     return tg;
   }
   return null;
 };
 
 export const getTelegramUser = () => {
-  const tg = window.Telegram?.WebApp;
-  
-  if (!tg?.initDataUnsafe?.user) {
-    console.warn('⚠️ Dati utente non disponibili');
+  try {
+    const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
+    
+    if (!user) {
+      console.warn('⚠️ No Telegram user data');
+      return null;
+    }
+
+    console.log('✅ Telegram user found:', user);
+    
+    return {
+      id: user.id.toString(),
+      firstName: user.first_name || '',
+      lastName: user.last_name || '',
+      username: user.username || '',
+      photoUrl: user.photo_url || null
+    };
+  } catch (error) {
+    console.error('❌ Error getting Telegram user:', error);
     return null;
   }
-
-  const user = tg.initDataUnsafe.user;
-  return {
-    id: user.id.toString(),
-    firstName: user.first_name,
-    lastName: user.last_name || '',
-    username: user.username || '',
-    photoUrl: user.photo_url || null
-  };
 };
 
 export const isInsideTelegramApp = () => {
-  return !!(window.Telegram?.WebApp?.initData);
+  return !!(window.Telegram?.WebApp?.initDataUnsafe?.user);
 };
 
 export const loginWithTelegram = async (userData) => {
   try {
     if (!userData?.id) {
-      throw new Error('Dati utente mancanti');
+      throw new Error('User data missing');
     }
 
-    const userResult = await getUser(userData.id);
-    
-    if (!userResult.success) {
-      await createUser(userData.id, {
-        telegramId: userData.id,
-        name: `${userData.firstName} ${userData.lastName}`.trim(),
-        username: userData.username,
-        avatar: userData.photoUrl,
-        email: null
-      });
-    }
-
-    return {
-      success: true,
-      user: {
-        id: userData.id,
-        name: `${userData.firstName} ${userData.lastName}`.trim(),
-        username: userData.username,
-        avatar: userData.photoUrl
+    // NON chiamare Firestore se fallisce - usa solo localStorage
+    let firestoreUser = null;
+    try {
+      const userResult = await getUser(userData.id);
+      if (!userResult.success) {
+        await createUser(userData.id, {
+          telegramId: userData.id,
+          name: `${userData.firstName} ${userData.lastName}`.trim(),
+          username: userData.username,
+          avatar: userData.photoUrl,
+          email: null
+        });
       }
+      firestoreUser = userResult.data;
+    } catch (firestoreError) {
+      console.warn('⚠️ Firestore error (continuing anyway):', firestoreError);
+    }
+
+    const user = {
+      id: userData.id,
+      name: `${userData.firstName} ${userData.lastName}`.trim(),
+      username: userData.username,
+      avatar: userData.photoUrl,
+      role: firestoreUser?.role || 'user'
     };
+
+    return { success: true, user };
   } catch (error) {
     console.error('❌ Login error:', error);
     return { success: false, error: error.message };

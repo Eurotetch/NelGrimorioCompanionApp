@@ -1,13 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { getUser } from '../services/firestore';
 import { 
   initTelegramWebApp, 
   getTelegramUser, 
   isInsideTelegramApp, 
-  loginWithTelegram as telegramLogin, 
-  logout as telegramLogout 
+  loginWithTelegram as telegramLogin 
 } from '../services/telegramAuth';
-import { initializeSettings, initializeGames } from '../utils/initializeFirestore';
 
 const AuthContext = createContext();
 
@@ -27,14 +24,10 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const initializeApp = async () => {
       try {
-        // Inizializza Firestore
-        await initializeSettings();
-        await initializeGames();
-
-        // Inizializza Telegram WebApp
+        // 1. Inizializza Telegram
         initTelegramWebApp();
 
-        // 1. Controlla localStorage
+        // 2. Controlla localStorage
         const savedUser = localStorage.getItem('user');
         if (savedUser) {
           const userData = JSON.parse(savedUser);
@@ -44,11 +37,11 @@ export const AuthProvider = ({ children }) => {
           return;
         }
 
-        // 2. Se dentro Telegram WebApp, auto-login
+        // 3. Se dentro Telegram, auto-login
         if (isInsideTelegramApp()) {
           const telegramUser = getTelegramUser();
           if (telegramUser) {
-            console.log('🔐 Auto-login da Telegram WebApp');
+            console.log('🔐 Auto-login from Telegram');
             const result = await telegramLogin(telegramUser);
             if (result.success) {
               setIsAuth(true);
@@ -58,7 +51,7 @@ export const AuthProvider = ({ children }) => {
           }
         }
       } catch (error) {
-        console.error('❌ Errore inizializzazione:', error);
+        console.error('❌ Init error:', error);
       } finally {
         setLoading(false);
       }
@@ -78,21 +71,15 @@ export const AuthProvider = ({ children }) => {
       }
       return result;
     } catch (error) {
-      console.error('❌ Login error:', error);
       return { success: false, error: error.message };
     }
   };
 
   const logout = async () => {
-    try {
-      await telegramLogout();
-      setIsAuth(false);
-      setUser(null);
-      localStorage.removeItem('user');
-      return { success: true };
-    } catch (error) {
-      return { success: false, error: error.message };
-    }
+    setIsAuth(false);
+    setUser(null);
+    localStorage.removeItem('user');
+    return { success: true };
   };
 
   return (
