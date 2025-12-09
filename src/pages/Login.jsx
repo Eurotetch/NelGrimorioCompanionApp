@@ -1,39 +1,39 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { ArrowLeft, AlertCircle } from 'lucide-react';
-import TelegramLoginButton from '../components/TelegramLoginButton';
-import { isInsideTelegramApp } from '../services/telegramAuth';
+import { ArrowLeft, User, Phone } from 'lucide-react';
 
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { loginWithTelegram, isAuth } = useAuth();
-  const [error, setError] = useState(null);
+  const { loginWithTelegram } = useAuth();
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
 
   const from = location.state?.from || '/';
-  const insideTelegram = isInsideTelegramApp();
 
-  // Se già autenticato, redirect
-  useEffect(() => {
-    if (isAuth) {
-      navigate(from, { replace: true });
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    
+    if (!name.trim()) {
+      alert('Inserisci il tuo nome');
+      return;
     }
-  }, [isAuth, navigate, from]);
 
-  const handleTelegramAuth = async (userData) => {
-    setError(null);
-    const result = await loginWithTelegram(userData);
+    // Simula dati Telegram (temporaneo)
+    const fakeUser = {
+      id: phone || Date.now().toString(),
+      firstName: name.split(' ')[0] || name,
+      lastName: name.split(' ')[1] || '',
+      username: name.toLowerCase().replace(/\s/g, '_'),
+      photoUrl: null
+    };
+
+    const result = await loginWithTelegram(fakeUser);
     
     if (result.success) {
       navigate(from, { replace: true });
-    } else {
-      setError(result.error || 'Errore durante il login');
     }
-  };
-
-  const handleGuestContinue = () => {
-    navigate(from, { replace: true });
   };
 
   return (
@@ -56,50 +56,63 @@ const Login = () => {
         </div>
 
         <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold text-yellow-400 mb-2">Benvenuto!</h1>
-          <p className="text-stone-300 text-sm">
-            {insideTelegram 
-              ? 'Sei dentro Telegram! Il login è automatico.' 
-              : 'Accedi con Telegram per iniziare'}
+          <h1 className="text-3xl font-bold text-yellow-400 mb-2">Accedi</h1>
+          <p className="text-stone-400 text-sm">
+            Login temporaneo (in attesa integrazione Telegram)
           </p>
         </div>
 
-        {error && (
-          <div className="mb-4 p-3 bg-red-900/30 border border-red-500 rounded-lg flex items-start gap-2">
-            <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-            <p className="text-sm text-red-300">{error}</p>
+        <form onSubmit={handleLogin} className="space-y-4">
+          <div>
+            <label className="block text-sm font-semibold text-stone-300 mb-2">
+              Nome
+            </label>
+            <div className="relative">
+              <User className="absolute left-3 top-3 w-5 h-5 text-stone-400" />
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Francesco Luongo"
+                className="w-full pl-10 pr-4 py-3 bg-stone-900 border border-stone-700 rounded-lg text-white focus:outline-none focus:border-yellow-500"
+              />
+            </div>
           </div>
-        )}
 
-        {/* Widget Telegram (solo da browser) */}
-        {!insideTelegram && (
-          <div className="mb-4">
-            <TelegramLoginButton 
-              botUsername="NelGrimorioCompanionApp_bot"
-              onAuth={handleTelegramAuth}
-            />
+          <div>
+            <label className="block text-sm font-semibold text-stone-300 mb-2">
+              Telefono (opzionale)
+            </label>
+            <div className="relative">
+              <Phone className="absolute left-3 top-3 w-5 h-5 text-stone-400" />
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="+39 123 456 7890"
+                className="w-full pl-10 pr-4 py-3 bg-stone-900 border border-stone-700 rounded-lg text-white focus:outline-none focus:border-yellow-500"
+              />
+            </div>
           </div>
-        )}
 
-        {/* Se dentro Telegram, spiega che è automatico */}
-        {insideTelegram && (
-          <div className="mb-4 p-4 bg-cyan-900/30 border border-cyan-500 rounded-lg text-center">
-            <p className="text-sm text-cyan-300">
-              ✅ Login automatico attivo. Se non sei stato autenticato, riapri l'app.
-            </p>
-          </div>
-        )}
+          <button
+            type="submit"
+            className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 py-3 rounded-lg font-bold transition-colors"
+          >
+            Accedi
+          </button>
+        </form>
 
         <button 
-          onClick={handleGuestContinue}
-          className="w-full bg-stone-700 hover:bg-stone-600 py-3 rounded-lg font-semibold text-base transition-colors"
+          onClick={() => navigate(from, { replace: true })}
+          className="w-full mt-3 bg-stone-700 hover:bg-stone-600 py-3 rounded-lg font-semibold transition-colors"
         >
           Continua come Ospite
         </button>
 
-        <div className="mt-6 p-4 bg-stone-900 border border-stone-700 rounded-lg">
-          <p className="text-xs text-stone-400 text-center">
-            ⚠️ <strong>Modalità Ospite:</strong> Non potrai creare stanze o gestire la collezione
+        <div className="mt-6 p-4 bg-cyan-900/30 border border-cyan-500 rounded-lg">
+          <p className="text-xs text-cyan-300 text-center">
+            ℹ️ Questa è una versione di sviluppo. L'integrazione Telegram completa arriverà presto.
           </p>
         </div>
       </div>
