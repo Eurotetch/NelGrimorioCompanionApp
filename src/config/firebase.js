@@ -4,12 +4,12 @@ import { getFirestore, enableIndexedDbPersistence } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAQc0MLTKCbWStSqPp0iYLb9UghGI_mprQ",
-  authDomain: "nel-grimorio-app.firebaseapp.com",
-  projectId: "nel-grimorio-app",
-  storageBucket: "nel-grimorio-app.firebasestorage.app",
-  messagingSenderId: "941937200372",
-  appId: "1:941937200372:web:ed30a295569fff76bee2a1"
+  apiKey: "AIzaSyCG8CwdxdUQlC4bYOfxi6sppzGL5nO--8c",
+  authDomain: "nel-grimorio-companion-app-cld.firebaseapp.com",
+  projectId: "nel-grimorio-companion-app-cld",
+  storageBucket: "nel-grimorio-companion-app-cld.firebasestorage.app",
+  messagingSenderId: "636653022198",
+  appId: "1:636653022198:web:459c396f561352209b75d7"
 };
 
 // Initialize Firebase

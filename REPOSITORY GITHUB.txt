@@ -1,5 +1,0 @@
-con SSH
-git@github.com:Eurotetch/NelGrimorioCompanionApp.git
-
-http:
-https://github.com/Eurotetch/NelGrimorioCompanionApp.git

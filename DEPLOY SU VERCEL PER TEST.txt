@@ -1,5 +1,0 @@
-App online:
-https://nel-grimorio-companion-app.vercel.app/
-
-Dashboard:
-https://vercel.com/eurotetchs-projects/nel-grimorio-companion-app

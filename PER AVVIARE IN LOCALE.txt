@@ -1,5 +1,0 @@
-(da terminale)
-npm run dev
-
-(browser)
-https://localhost:5173
